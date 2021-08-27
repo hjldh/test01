@@ -340,7 +340,7 @@ port: 8080
 
 
 
-- CQRS/saga/correlation
+## CQRS/saga/correlation
 
   - Materialized View를 구현하여, 타 마이크로서비스의 데이터 원본에 접근없이(Composite 서비스나 조인SQL 등 없이)도 내 서비스의 화면 구성과 잦은 조회가 가능하게 구현해 두었다. 본 프로젝트에서 View 역할은 MyPages 서비스가 수행한다.
   - 비동기식으로 처리되어 발행된 이벤트 기반 Kafka 를 통해 수신/처리 되어 별도 Table 에 관리한다
@@ -360,7 +360,7 @@ port: 8080
 
 
 
-- 동기식-호출-과-Fallback-처리
+## 동기식-호출-과-Fallback-처리
     - 분석단계에서의 조건 중 하나로 계약(Contract)->결제(Pay) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다.
     - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현
 ```java 
@@ -537,14 +537,14 @@ http GET http://20.200.224.11:8080/reservations  >> 장애 동안 발생한 계�
 
 
 
-#폴리글랏-퍼시스턴스
+## 폴리글랏-퍼시스턴스
 앱프런트 (app) 는 서비스 특성상 많은 사용자의 유입과 상품 정보의 다양한 콘텐츠를 저장해야 하는 특징으로 인해 RDB 보다는 Document DB / NoSQL 계열의 데이터베이스인 Mongo DB 를 사용하기로 하였다. 이를 위해 order 의 선언에는 @Entity 가 아닌 @Document 로 마킹되었으며, 별다른 작업없이 기존의 Entity Pattern 과 Repository Pattern 적용과 데이터베이스 제품의 설정 (application.yml) 만으로 MongoDB 에 부착시켰다
 
 
 
 # 운영
  
-- CI/CD 설정 
+## CI/CD 설정 
 
 각 구현체들은 각자의 source repository 에 구성되었고, 각 소스 경로에서
 mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를 빌드한 후
@@ -552,43 +552,54 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
 
  소스 가져오기
  
-   git clone https://github.com/leo99k/carrental.git
+```java
+git clone https://github.com/leo99k/carrental.git
+```
+
 
  
-- Deploy / Pipeline
+## Deploy / Pipeline
  
-  •	build 하기
+ - build 하기
  계약 경로로 접속
-  cd Contract
-
+ ```java
+cd Contract
   mvn package
-
    az acr build --registry user05 --image user05.azurecr.io/contract:v1 .
+```
+  
 
 미리 생성한 yml 파일을 이용하여 배포
+```java 
   kubectl apply -f deployment.yml
   kubectl apply -f service.yaml  //또는 kubectl expose deploy mypage --type=ClusterIP --port=8080 (gateway 의 경우는 LoadBalancer) 로 적용한다.
+```
 
  * docker로 할 경우
-   -- 도커 빌드
+```java 
+-- 도커 빌드
     docker build -t user05.azurecr.io/contract:v1 .
    -- 도커 푸시
     docker push user05.azurecr.io/contract:v1
 
-   --권한 오류시
+```
+
+--권한 오류시
+```java 
     az acr login --name user05
+```
 
   각 Pay / Reservation / MyPage / gateway 도 동일하게 처리한다.
 
- Service, Pod, Deploy 상태 확인 
+
+Service, Pod, Deploy 상태 확인 
  
  ![image](https://user-images.githubusercontent.com/86760697/131059581-8f0d3cc8-ac9a-43e1-91cc-d3791710ad0e.png)
 
- 
-    
-- ConfigMap
- •	deployment.yml 파일에 설정
-```yaml
+     
+## ConfigMap
+- deployment.yml 파일에 설정
+```java
  ## Config map Set start
           env:
             - name: SYSTEM_MODE
@@ -597,17 +608,25 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
                   name: systemmode
                   key: sysmodeval
  ## Config map Set end
+```
 
  ConfigMap 생성
+```java 
    kubectl create configmap systemmode --from-literal=sysmodeval=PROD_SYSTEM
+
+```
+
  Configmap 생성, 정보 확인
+```java 
    kubectl get configmap systemmode -o yaml
+
+```
 
 ![image](https://user-images.githubusercontent.com/86760697/131059863-865e36dc-e262-46bf-a47c-97d6c4c14f93.png)
 
  *Contract 호출 시 해당 시스템이 로컬/개발/운영 인지 여부를 ConfigMap 을 이용해서 확인하도록 구현하였음
 
-'''
+```java 
 @PostPersist
     public void onPostPersist(){
     	
@@ -617,7 +636,7 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
         System.out.println("################## 현재 접속중인 시스템 : " + sysMode);
     	
         System.out.println("################### Contract >> 계약 생성 ##############################");
-
+```
 
 *로컬의 경우
 
@@ -627,8 +646,8 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
 
 ![image](https://user-images.githubusercontent.com/86760697/131060095-d1809385-52f4-415e-a81c-d7835b059ceb.png)
 
-```
 
+진행 필요
     - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출-서킷-브레이킹-장애격리)
     
     
@@ -637,6 +656,7 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
     - [무정지 재배포](#무정지-재배포)
     - [Liveness Probe](#Liveness-Probe)
 
+진행 필요
 
 
 
@@ -659,7 +679,7 @@ mvn package 및 컨테이너 레지스트리 의 리파지토리로 이미지를
 
 
 
-#동기식-호출-과-Fallback-처리
+## 동기식-호출-과-Fallback-처리
 - 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
 시나리오는 계약(Contract)-->결제(Pay) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB 를 통하여 장애격리.
 
