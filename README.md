@@ -252,7 +252,7 @@ http GET http://20.200.226.177:8080/contracts/1
 
 
 
-- GateWay-적용
+## GateWay-적용
 API GateWay를 통하여 마이크로 서비스들의 집입점을 통일할 수 있다. 다음과 같이 GateWay를 적용하였다.
 
 ```java 
