@@ -348,6 +348,7 @@ port: 8080
 ![image](https://user-images.githubusercontent.com/18524113/131063233-ff00a9cc-df94-4b7f-8360-42e59e2011c1.png)
 ![image](https://user-images.githubusercontent.com/18524113/131063282-488933d5-187d-4f10-bb7d-f7a5be4febe8.png)
   - 계약 실행 후 MyPages 화면
+
 ![image](https://user-images.githubusercontent.com/11002207/131057509-c690ac7b-b976-477a-b648-025f90dce1f1.png)
 
   - 계약취소 취소 후 MyPages 화면
